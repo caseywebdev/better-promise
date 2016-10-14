@@ -1,0 +1,4 @@
+#!/usr/bin/env bash -e
+
+bin/clean
+exec node_modules/.bin/cogs

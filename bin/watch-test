@@ -1,0 +1,4 @@
+#!/usr/bin/env bash -e
+
+exec node_modules/.bin/watchy -w build -- \
+  node_modules/.bin/istanbul cover node_modules/.bin/_mocha build/test.js

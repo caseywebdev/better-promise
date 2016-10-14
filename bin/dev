@@ -1,0 +1,6 @@
+#!/usr/bin/env bash -e
+
+bin/watch-build &
+sleep 2
+bin/watch-test &
+wait

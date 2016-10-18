@@ -43,6 +43,7 @@ export default class BetterPromise {
 
     const resolve = value => {
       if (BetterPromise.isPromise(value)) return value.then(resolve, reject);
+
       try { complete('fulfilled', value); } catch (er) { reject(er); }
     };
 
@@ -57,14 +58,13 @@ export default class BetterPromise {
     return new BetterPromise((resolve, reject) => {
       const {handlers, state, value} = this;
 
-      const runFulfilled =
-        onFulfilled ? value => resolve(onFulfilled(value)) : resolve;
+      const wrapHandler = fn =>
+        value => { try { resolve(fn(value)); } catch (er) { reject(er); } };
 
-      const runRejected =
-        onRejected ? value => resolve(onRejected(value)) : reject;
-
+      const runFulfilled = onFulfilled ? wrapHandler(onFulfilled) : resolve;
       if (state === 'fulfilled') return runFulfilled(value);
 
+      const runRejected = onRejected ? wrapHandler(onRejected) : reject;
       if (state === 'rejected') return runRejected(value);
 
       handlers.push({fulfilled: runFulfilled, rejected: runRejected});

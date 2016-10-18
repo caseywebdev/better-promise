@@ -15,7 +15,7 @@ export default class BetterPromise {
       let done = 0;
       const values = [];
       for (let i = 0, l = promises.length; i < l; ++i) {
-        promises[i].then(value => {
+        BetterPromise.resolve(promises[i]).then(value => {
           values[i] = value;
           if (++done === l) resolve(values);
         }, reject);
@@ -25,7 +25,7 @@ export default class BetterPromise {
   static race = promises =>
     new BetterPromise((resolve, reject) => {
       for (let i = 0, l = promises.length; i < l; ++i) {
-        promises[i].then(resolve, reject);
+        BetterPromise.resolve(promises[i]).then(resolve, reject);
       }
     });
 

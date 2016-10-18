@@ -12,12 +12,15 @@ export default class BetterPromise {
 
   static all = promises =>
     new BetterPromise((resolve, reject) => {
-      let done = 0;
+      const {length} = promises;
       const values = [];
-      for (let i = 0, l = promises.length; i < l; ++i) {
+      if (!length) return resolve(values);
+
+      let done = 0;
+      for (let i = 0; i < length; ++i) {
         BetterPromise.resolve(promises[i]).then(value => {
           values[i] = value;
-          if (++done === l) resolve(values);
+          if (++done === length) resolve(values);
         }, reject);
       }
     });

@@ -64,7 +64,8 @@ export default class BetterPromise {
     return new BetterPromise((resolve, reject) => {
       const {handlers, state, value} = this;
 
-      const wrapHandler = fn => value => resolve(fn(value));
+      const wrapHandler = fn =>
+        value => { try { resolve(fn(value)); } catch (er) { reject(er); } };
 
       const runFulfilled = onFulfilled ? wrapHandler(onFulfilled) : resolve;
       if (state === 'fulfilled') return runFulfilled(value);

@@ -34,17 +34,23 @@ export default class BetterPromise {
 
   constructor(callback) {
     const complete = (state, value) => {
-      const {handlers, handlers: {length: l}} = this;
+      if (this.state !== 'pending') return;
+
       this.state = state;
       this.value = value;
-      for (let i = 0; i < l; ++i) handlers[i][state](value);
-      handlers.length = 0;
+      let handler;
+      while (handler = this.handlers.shift()) {
+        try { handler[state](value); } catch (er) {
+          if (state === 'fulfilled') handler.rejected(er);
+          else throw er;
+        }
+      }
     };
 
     const resolve = value => {
       if (BetterPromise.isPromise(value)) return value.then(resolve, reject);
 
-      try { complete('fulfilled', value); } catch (er) { reject(er); }
+      complete('fulfilled', value);
     };
 
     const reject = reason => complete('rejected', reason);

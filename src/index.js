@@ -34,15 +34,21 @@ export default class BetterPromise {
 
   constructor(callback) {
     const complete = (state, value) => {
-      if (this.state !== 'pending') return;
+      if (this.state === 'rejected') return;
+
+      if (state === 'fulfilled' && this.state !== 'pending') return;
 
       this.state = state;
       this.value = value;
+      const {handlers} = this;
+      if (!handlers.length && state === 'rejected') {
+        this.throwTimeout = setTimeout(() => { throw value; });
+      }
       let handler;
-      while (handler = this.handlers.shift()) {
+      while (handler = handlers.shift()) {
         try { handler[state](value); } catch (er) {
-          if (state === 'fulfilled') handler.rejected(er);
-          else throw er;
+          handlers.unshift(handler);
+          complete('rejected', er);
         }
       }
     };
@@ -61,9 +67,12 @@ export default class BetterPromise {
   }
 
   then(onFulfilled, onRejected) {
+    const {handlers, state, value} = this;
+    if (this.throwTimeout) {
+      clearTimeout(this.throwTimeout);
+      delete this.throwTimeout;
+    }
     return new BetterPromise((resolve, reject) => {
-      const {handlers, state, value} = this;
-
       const wrapHandler = fn =>
         value => { try { resolve(fn(value)); } catch (er) { reject(er); } };
 

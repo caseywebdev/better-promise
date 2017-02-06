@@ -25,6 +25,72 @@ describe('BetterPromise', () => {
     expect(foo).to.equal('baz');
   });
 
+  it('will throw on uncaught errors', done => {
+    const error = new Error('baz');
+    process.prependOnceListener('uncaughtException', er => {
+      try {
+        expect(er).to.equal(error);
+        done();
+      } catch (er) {
+        done(er);
+      }
+    });
+    Promise.reject(error);
+  });
+
+  it('will throw on uncaught errors in caught handlers', done => {
+    const error = new Error('baz');
+    process.prependOnceListener('uncaughtException', er => {
+      try {
+        expect(er).to.equal(error);
+        done();
+      } catch (er) {
+        done(er);
+      }
+    });
+    Promise.reject(error).catch(er => { throw er; });
+  });
+
+  it('will throw on uncaught errors when fulfilled is handled', done => {
+    const error = new Error('baz');
+    process.prependOnceListener('uncaughtException', er => {
+      try {
+        expect(er).to.equal(error);
+        done();
+      } catch (er) {
+        done(er);
+      }
+    });
+    Promise.reject(error).then(() => 'handling fulfilled');
+  });
+
+  it('will throw on nested uncaught errors', done => {
+    const error = new Error('baz');
+    process.prependOnceListener('uncaughtException', er => {
+      try {
+        expect(er).to.equal(error);
+        done();
+      } catch (er) {
+        done(er);
+      }
+    });
+    Promise.resolve()
+      .then(() => 'this is fine')
+      .then(() => 'this too')
+      .then(() => { throw error; })
+      .then(() => 'no prob here');
+  });
+
+  it('will not throw on nested caught errors', () => {
+    const error = new Error('baz');
+    return Promise.resolve()
+      .then(() => 'this is fine')
+      .then(() => 'this too')
+      .then(() => { throw error; })
+      .then(() => 'no prob here')
+      .catch(er => expect(er).to.equal(error));
+  });
+
   it('can chain', done => {
     new Promise(resolve => resolve(Promise.resolve('foo')))
       .then(val => {

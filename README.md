@@ -2,7 +2,8 @@
 
 Forcing a minimum timeout on a Promise like the spec requires is needless and
 wasteful. BetterPromise allows synchronous resolutions to keep things moving
-quickly.
+quickly. In addition, BetterPromise will throw an error for any uncaught
+rejections, much like the Node.js Promise.
 
 [Try it out in your browser.](https://tonicdev.com/npm/pave)
 

@@ -22,7 +22,11 @@ const Promise = require('better-promise');
 ```
 
 `BetterPromise` has the same API as the native [Promise] class with the addition
-of a couple static helper methods.
+of a few static helper methods.
+
+### `BetterPromise.defer() => Deferred`
+
+Returns a deferred object with `promise`, `resolve`, and `reject` properties.
 
 ### `BetterPromise.isPromise(obj) => Boolean`
 
